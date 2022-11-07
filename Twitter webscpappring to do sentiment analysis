@@ -1,0 +1,75 @@
+import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait as wait
+from selenium.webdriver.support import expected_conditions as EC
+import time  
+from selenium.webdriver.edge.service import Service
+import snscrape.modules.twitter as sntwitter
+
+
+query="#austinhousing"
+tweets= []
+limit=50
+
+for tweet in sntwitter.TwitterSearchScraper(query).get_items():
+    if len(tweets) == limit:
+        break
+    else:
+        tweets.append([tweet.date, tweet.username, tweet.content])
+
+df=pd.DataFrame(tweets, columns=['Date', 'User', 'Tweet'])
+print(df)
+
+tweets= df.Tweet
+
+tweets.to_csv(r'C:\Users\zanna\OneDrive\Documents\MSIS\twitter\austin.txt', header=None, sep='\t', mode='a')
+
+
+text=open(r'C:\Users\zanna\OneDrive\Documents\MSIS\twitter\austin.txt', encoding='utf-8').read()
+lower_case=text.lower()
+
+# import string library function 
+import string
+cleaned_text= lower_case.translate(str.maketrans('', '', string.punctuation))
+
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+def sentiment_analyse(sentiment_text):
+    score=SentimentIntensityAnalyzer().polarity_scores(sentiment_text)
+    print(score)
+    if score['neg']>score['pos']:
+        print("Negative Sentiment")
+    elif score['neg']<score['pos']:
+        print("Positive Sentiment")
+    else:
+        print("Neutral Sentiment")
+
+sentiment_analyse(cleaned_text)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
